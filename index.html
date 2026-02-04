@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>BT Group Chat</title>
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:#e5e7eb}
+header{background:#020617;padding:10px;text-align:center}
+#chat{height:75vh;overflow:auto;padding:10px}
+.msg{margin:4px 0}
+.me{color:#22c55e}
+.other{color:#38bdf8}
+.pm{color:#facc15}
+footer{display:flex;gap:5px;padding:10px;background:#020617}
+input,select{padding:6px;border-radius:4px;border:none}
+button{padding:6px 10px;border:none;border-radius:4px;background:#2563eb;color:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <b>Bluetooth Chat (Grup + Private)</b><br>
+  ID Kamu: <span id="myid"></span>
+</header>
+
+<div id="chat"></div>
+
+<footer>
+  <select id="mode">
+    <option value="GRUP">GRUP</option>
+    <option value="PM">PRIBADI</option>
+  </select>
+
+  <input id="toid" placeholder="ID tujuan (PM)">
+  <input id="text" placeholder="Ketik pesan">
+  <button onclick="send()">Kirim</button>
+</footer>
+
+<script>
+/* ========= IDENTITAS ========= */
+const MY_ID = Math.random().toString(36).slice(2,7);
+document.getElementById("myid").innerText = MY_ID;
+
+const chat = document.getElementById("chat");
+
+/* ========= TAMPIL CHAT ========= */
+function log(text, cls){
+  let d=document.createElement("div");
+  d.className="msg "+cls;
+  d.textContent=text;
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+/* ========= KIRIM PESAN ========= */
+function send(){
+  let t=text.value.trim();
+  if(!t) return;
+
+  let mode=document.getElementById("mode").value;
+  let data="";
+
+  if(mode==="GRUP"){
+    data=`MSG|${MY_ID}|${t}\n`;
+    log("Me (Grup): "+t,"me");
+  }else{
+    let to=toid.value.trim();
+    if(!to){ alert("Isi ID tujuan"); return; }
+    data=`PM|${MY_ID}|${to}|${t}\n`;
+    log(`Me (PM ke ${to}): ${t}`,"pm");
+  }
+
+  if(window.AndroidBT){
+    AndroidBT.send(data);
+  }
+
+  text.value="";
+}
+
+/* ========= TERIMA DARI BLUETOOTH ========= */
+window.onBTMessage=function(raw){
+  raw.split("\n").forEach(line=>{
+    if(!line) return;
+    let p=line.split("|");
+
+    if(p[0]==="MSG"){
+      if(p[1]!==MY_ID)
+        log(`${p[1]}: ${p[2]}`,"other");
+    }
+
+    if(p[0]==="PM"){
+      if(p[2]===MY_ID)
+        log(`PM dari ${p[1]}: ${p[3]}`,"pm");
+    }
+  });
+};
+</script>
+
+</body>
+</html>
