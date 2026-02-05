@@ -1,100 +1,559 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>BT Group Chat</title>
-<style>
-body{margin:0;font-family:Arial;background:#0f172a;color:#e5e7eb}
-header{background:#020617;padding:10px;text-align:center}
-#chat{height:75vh;overflow:auto;padding:10px}
-.msg{margin:4px 0}
-.me{color:#22c55e}
-.other{color:#38bdf8}
-.pm{color:#facc15}
-footer{display:flex;gap:5px;padding:10px;background:#020617}
-input,select{padding:6px;border-radius:4px;border:none}
-button{padding:6px 10px;border:none;border-radius:4px;background:#2563eb;color:#fff}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Chat Bluetooth</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0a192f;
+            color: #e6f1ff;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #112240;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #0a192f;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #64ffda;
+        }
+        
+        h1 {
+            color: #64ffda;
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #8892b0;
+            font-size: 14px;
+        }
+        
+        .status-bar {
+            padding: 15px;
+            background-color: #1a365d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2d3748;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #f56565;
+        }
+        
+        .status-indicator.connected {
+            background-color: #48bb78;
+        }
+        
+        .device-info {
+            font-size: 14px;
+            color: #cbd5e0;
+        }
+        
+        .controls {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            background-color: #0a192f;
+            border-bottom: 1px solid #2d3748;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background-color: #64ffda;
+            color: #0a192f;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #52d1b2;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: #4a5568;
+            color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.secondary {
+            background-color: #2d3748;
+            color: #e6f1ff;
+        }
+        
+        button.secondary:hover {
+            background-color: #4a5568;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            padding: 0;
+        }
+        
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #0a192f;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .sent {
+            align-self: flex-end;
+            background-color: #64ffda;
+            color: #0a192f;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .received {
+            align-self: flex-start;
+            background-color: #2d3748;
+            color: #e6f1ff;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-info {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 20px;
+            background-color: #112240;
+            border-top: 1px solid #2d3748;
+        }
+        
+        input {
+            flex-grow: 1;
+            padding: 15px;
+            border: 2px solid #2d3748;
+            border-radius: 8px;
+            background-color: #0a192f;
+            color: #e6f1ff;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        input:focus {
+            border-color: #64ffda;
+        }
+        
+        .instructions {
+            background-color: #1a365d;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        
+        .instructions h3 {
+            color: #64ffda;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #cbd5e0;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .instructions code {
+            background-color: #2d3748;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .error {
+            background-color: #fed7d7;
+            color: #9b2c2c;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .timestamp {
+            font-size: 11px;
+            text-align: right;
+            opacity: 0.7;
+            margin-top: 3px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8892b0;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .chat-container {
+                height: 400px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>Aplikasi Chat Bluetooth</h1>
+            <p class="subtitle">Chat langsung antar perangkat tanpa server, hanya menggunakan Bluetooth</p>
+        </header>
+        
+        <div class="status-bar">
+            <div class="connection-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Terputus</span>
+            </div>
+            <div class="device-info" id="deviceInfo">Belum terhubung ke perangkat</div>
+        </div>
+        
+        <div class="error" id="errorMessage"></div>
+        
+        <div class="controls">
+            <button id="connectBtn">Hubungkan ke Perangkat Bluetooth</button>
+            <button id="disconnectBtn" class="secondary" disabled>Putuskan Koneksi</button>
+            <button id="clearBtn" class="secondary">Bersihkan Chat</button>
+        </div>
+        
+        <div class="chat-container">
+            <div class="messages" id="messagesContainer">
+                <!-- Pesan akan muncul di sini -->
+                <div class="message received">
+                    <div>Selamat datang di Aplikasi Chat Bluetooth!</div>
+                    <div class="message-info">Sistem</div>
+                </div>
+                <div class="message received">
+                    <div>Hubungkan ke perangkat Bluetooth untuk memulai percakapan.</div>
+                    <div class="message-info">Sistem</div>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Ketik pesan Anda di sini..." disabled>
+                <button id="sendBtn" disabled>Kirim</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>Cara Menggunakan:</h3>
+        <ol>
+            <li>Klik tombol <strong>"Hubungkan ke Perangkat Bluetooth"</strong> untuk memulai koneksi</li>
+            <li>Pilih perangkat Bluetooth yang ingin Anda hubungkan (kedua perangkat harus sudah dipasangkan)</li>
+            <li>Setelah terhubung, Anda dapat mulai mengirim pesan</li>
+            <li>Pada perangkat lain, lakukan langkah yang sama untuk terhubung dan mulai chatting</li>
+            <li>Pastikan kedua perangkat mendukung <strong>Web Bluetooth API</strong> (Chrome/Edge di desktop dan Android)</li>
+        </ol>
+        <p><strong>Catatan:</strong> Aplikasi ini menggunakan karakteristik Bluetooth khusus untuk pertukaran pesan. Pastikan kedua perangkat menggunakan aplikasi yang sama.</p>
+    </div>
+    
+    <footer>
+        Aplikasi Chat Bluetooth - Berjalan langsung di browser tanpa server | Web Bluetooth API
+    </footer>
 
-<header>
-  <b>Bluetooth Chat (Grup + Private)</b><br>
-  ID Kamu: <span id="myid"></span>
-</header>
-
-<div id="chat"></div>
-
-<footer>
-  <select id="mode">
-    <option value="GRUP">GRUP</option>
-    <option value="PM">PRIBADI</option>
-  </select>
-
-  <input id="toid" placeholder="ID tujuan (PM)">
-  <input id="text" placeholder="Ketik pesan">
-  <button onclick="send()">Kirim</button>
-</footer>
-
-<script>
-/* ========= IDENTITAS ========= */
-const MY_ID = Math.random().toString(36).slice(2,7);
-document.getElementById("myid").innerText = MY_ID;
-
-const chat = document.getElementById("chat");
-
-/* ========= TAMPIL CHAT ========= */
-function log(text, cls){
-  let d=document.createElement("div");
-  d.className="msg "+cls;
-  d.textContent=text;
-  chat.appendChild(d);
-  chat.scrollTop=chat.scrollHeight;
-}
-
-/* ========= KIRIM PESAN ========= */
-function send(){
-  let t=text.value.trim();
-  if(!t) return;
-
-  let mode=document.getElementById("mode").value;
-  let data="";
-
-  if(mode==="GRUP"){
-    data=`MSG|${MY_ID}|${t}\n`;
-    log("Me (Grup): "+t,"me");
-  }else{
-    let to=toid.value.trim();
-    if(!to){ alert("Isi ID tujuan"); return; }
-    data=`PM|${MY_ID}|${to}|${t}\n`;
-    log(`Me (PM ke ${to}): ${t}`,"pm");
-  }
-
-  if(window.AndroidBT){
-    AndroidBT.send(data);
-  }
-
-  text.value="";
-}
-
-/* ========= TERIMA DARI BLUETOOTH ========= */
-window.onBTMessage=function(raw){
-  raw.split("\n").forEach(line=>{
-    if(!line) return;
-    let p=line.split("|");
-
-    if(p[0]==="MSG"){
-      if(p[1]!==MY_ID)
-        log(`${p[1]}: ${p[2]}`,"other");
-    }
-
-    if(p[0]==="PM"){
-      if(p[2]===MY_ID)
-        log(`PM dari ${p[1]}: ${p[3]}`,"pm");
-    }
-  });
-};
-</script>
-
+    <script>
+        // UUID untuk layanan dan karakteristik Bluetooth
+        const CHAT_SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+        const MESSAGE_CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+        
+        // Elemen DOM
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const deviceInfo = document.getElementById('deviceInfo');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Variabel global
+        let device = null;
+        let server = null;
+        let service = null;
+        let characteristic = null;
+        let isConnected = false;
+        
+        // Format waktu
+        function getCurrentTime() {
+            const now = new Date();
+            return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // Tampilkan pesan
+        function addMessage(text, type = 'received') {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${type}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.textContent = text;
+            
+            const messageInfo = document.createElement('div');
+            messageInfo.className = 'message-info';
+            messageInfo.textContent = type === 'sent' ? 'Anda' : 'Perangkat Lain';
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = getCurrentTime();
+            
+            messageElement.appendChild(messageContent);
+            messageElement.appendChild(messageInfo);
+            messageElement.appendChild(timestamp);
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Tampilkan error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Perbarui status koneksi
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            
+            if (connected) {
+                statusIndicator.classList.add('connected');
+                statusText.textContent = 'Terhubung';
+                deviceInfo.textContent = `Terhubung ke: ${device.name || 'Perangkat Bluetooth'}`;
+                
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            } else {
+                statusIndicator.classList.remove('connected');
+                statusText.textContent = 'Terputus';
+                deviceInfo.textContent = 'Belum terhubung ke perangkat';
+                
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                sendBtn.disabled = true;
+                messageInput.disabled = true;
+                messageInput.value = '';
+            }
+        }
+        
+        // Hubungkan ke perangkat Bluetooth
+        async function connectToBluetooth() {
+            try {
+                errorMessage.classList.remove('show');
+                
+                console.log('Meminta perangkat Bluetooth...');
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [CHAT_SERVICE_UUID] }],
+                    optionalServices: [CHAT_SERVICE_UUID]
+                });
+                
+                console.log('Menghubungkan ke GATT Server...');
+                device.addEventListener('gattserverdisconnected', onDisconnected);
+                server = await device.gatt.connect();
+                
+                console.log('Mendapatkan layanan...');
+                service = await server.getPrimaryService(CHAT_SERVICE_UUID);
+                
+                console.log('Mendapatkan karakteristik...');
+                characteristic = await service.getCharacteristic(MESSAGE_CHARACTERISTIC_UUID);
+                
+                // Mulai mendengarkan pesan masuk
+                await characteristic.startNotifications();
+                characteristic.addEventListener('characteristicvaluechanged', handleReceivedMessage);
+                
+                console.log('Bluetooth Chat siap!');
+                updateConnectionStatus(true);
+                addMessage('Berhasil terhubung ke perangkat Bluetooth!', 'received');
+                
+            } catch (error) {
+                console.error('Kesalahan koneksi Bluetooth:', error);
+                showError(`Gagal terhubung: ${error.message}`);
+                
+                if (device && device.gatt.connected) {
+                    device.gatt.disconnect();
+                }
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // Tangani pesan yang diterima
+        function handleReceivedMessage(event) {
+            const value = event.target.value;
+            const decoder = new TextDecoder('utf-8');
+            const message = decoder.decode(value);
+            
+            if (message && message.trim() !== '') {
+                addMessage(message, 'received');
+            }
+        }
+        
+        // Kirim pesan
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            
+            if (!message || !isConnected || !characteristic) {
+                return;
+            }
+            
+            try {
+                const encoder = new TextEncoder('utf-8');
+                const data = encoder.encode(message);
+                
+                await characteristic.writeValue(data);
+                addMessage(message, 'sent');
+                messageInput.value = '';
+                messageInput.focus();
+                
+            } catch (error) {
+                console.error('Gagal mengirim pesan:', error);
+                showError(`Gagal mengirim pesan: ${error.message}`);
+            }
+        }
+        
+        // Tangani pemutusan koneksi
+        function onDisconnected() {
+            console.log('Perangkat Bluetooth terputus');
+            updateConnectionStatus(false);
+            addMessage('Koneksi Bluetooth terputus', 'received');
+        }
+        
+        // Putuskan koneksi Bluetooth
+        function disconnectBluetooth() {
+            if (!device) {
+                return;
+            }
+            
+            if (device.gatt.connected) {
+                device.gatt.disconnect();
+            }
+            
+            updateConnectionStatus(false);
+            addMessage('Koneksi Bluetooth diputuskan', 'received');
+            
+            // Reset variabel
+            device = null;
+            server = null;
+            service = null;
+            characteristic = null;
+        }
+        
+        // Bersihkan chat
+        function clearChat() {
+            messagesContainer.innerHTML = `
+                <div class="message received">
+                    <div>Riwayat chat telah dibersihkan.</div>
+                    <div class="message-info">Sistem</div>
+                </div>
+            `;
+        }
+        
+        // Event Listeners
+        connectBtn.addEventListener('click', connectToBluetooth);
+        disconnectBtn.addEventListener('click', disconnectBluetooth);
+        clearBtn.addEventListener('click', clearChat);
+        
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && isConnected) {
+                sendMessage();
+            }
+        });
+        
+        // Cek dukungan Web Bluetooth API
+        if (!navigator.bluetooth) {
+            showError('Browser Anda tidak mendukung Web Bluetooth API. Aplikasi ini memerlukan Chrome/Edge di desktop atau Android.');
+            connectBtn.disabled = true;
+            connectBtn.textContent = 'Bluetooth Tidak Didukung';
+        }
+        
+        // Inisialisasi
+        updateConnectionStatus(false);
+        
+        // Tambahkan pesan selamat datang
+        setTimeout(() => {
+            addMessage('Gunakan tombol "Hubungkan ke Perangkat Bluetooth" untuk memulai.', 'received');
+        }, 1000);
+    </script>
 </body>
 </html>
